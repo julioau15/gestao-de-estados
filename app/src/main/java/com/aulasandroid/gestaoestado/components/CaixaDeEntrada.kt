@@ -1,7 +1,5 @@
 package com.aulasandroid.gestaoestado.components
 
-import android.R.attr.text
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text

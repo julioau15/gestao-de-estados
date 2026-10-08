@@ -14,45 +14,27 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableDoubleStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.aulasandroid.gestaoestado.calculos.calcularJuros
-import com.aulasandroid.gestaoestado.calculos.calcularMontante
 import com.aulasandroid.gestaoestado.components.CaixaDeEntrada
 import com.aulasandroid.gestaoestado.components.CardResultado
 
-@Preview(showBackground = true)
 @Composable
-fun JurosScreen(modifier: Modifier = Modifier) {
-    var capital by remember {
-        mutableStateOf("")
-    }
-
-    var taxa by remember {
-        mutableStateOf("")
-    }
-
-    var tempo by remember {
-        mutableStateOf("")
-    }
-
-    var juros by remember {
-        mutableDoubleStateOf(0.0)
-    }
-
-    var montante by remember {
-        mutableDoubleStateOf(0.0)
-    }
+fun JurosScreen(
+    modifier: Modifier = Modifier,
+    jurosScreenViewModel: JurosScreenViewModel
+) {
+    val capital by jurosScreenViewModel.capital.observeAsState(initial = "")
+    val taxa by jurosScreenViewModel.taxa.observeAsState(initial = "")
+    val tempo by jurosScreenViewModel.tempo.observeAsState(initial = "")
+    val juros by jurosScreenViewModel.juros.observeAsState(initial = 0.0)
+    val montante by jurosScreenViewModel.montante.observeAsState(initial = 0.0)
 
     Column (
         modifier = modifier.fillMaxSize(),
@@ -106,7 +88,7 @@ fun JurosScreen(modifier: Modifier = Modifier) {
                             label = "Valor investimento",
                             placeholder =  "Quanto deseja investir?",
                             keyboardType = KeyboardType.Decimal,
-                            atualizarvalor = {capital = it}
+                            atualizarvalor = {jurosScreenViewModel.onCapitalChange(it)}
                         )
 
                         CaixaDeEntrada(
@@ -116,7 +98,7 @@ fun JurosScreen(modifier: Modifier = Modifier) {
                             placeholder = "Qual a taxa de juros mensal?",
                             keyboardType = KeyboardType.Decimal
                         ){
-                            taxa = it
+                            jurosScreenViewModel.onTaxaChange(it)
                         }
 
                         CaixaDeEntrada(
@@ -126,21 +108,13 @@ fun JurosScreen(modifier: Modifier = Modifier) {
                             placeholder = "Qual o tempo em meses?",
                             keyboardType = KeyboardType.Decimal
                         ){
-                            tempo = it
+                            jurosScreenViewModel.onTempoChange(it)
                         }
 
                         Button(
                             onClick = {
-                                juros = calcularJuros(
-                                    capital = capital.toDouble(),
-                                    taxa = taxa.toDouble(),
-                                    tempo = tempo.toDouble()
-                                )
-
-                                montante = calcularMontante(
-                                    capital = capital.toDouble(),
-                                    juros = juros
-                                )
+                                jurosScreenViewModel.calcularJurosInvestimento()
+                                jurosScreenViewModel.calcularMontanteInvestimento()
                             },
                             modifier = Modifier.fillMaxWidth()
                                 .height(48.dp)
